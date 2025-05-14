@@ -21,7 +21,9 @@ class ServerlessStack(TerraformStack):
         
         bucket = S3Bucket(
             self, "bucket",
-            bucket_prefix=""
+            bucket_prefix="bucketimage",
+            acl = "private",
+            force_destroy = True
         )
 
         # NE PAS TOUCHER !!!!
@@ -37,33 +39,43 @@ class ServerlessStack(TerraformStack):
 
         dynamo_table = DynamodbTable(
             self, "DynamodDB-table",
-            name= "",
-            hash_key="",
-            range_key="",
+            name= "postagram-table",
+            hash_key="user",
+            range_key="id",
             attribute=[
-                DynamodbTableAttribute(name="",type="S" ),
-                DynamodbTableAttribute(name="",type="S" ),
+                DynamodbTableAttribute(name="user",type="S" ),
+                DynamodbTableAttribute(name="id",type="S" ),
             ],
             billing_mode="PROVISIONED",
             read_capacity=5,
             write_capacity=5
         )
 
-        code = TerraformAsset()
+        code = TerraformAsset(
+            self, "lambda_asset",
+            path="./lambda.zip",
+            type= AssetType.FILE
+        )
 
         lambda_function = LambdaFunction(
             self, "lambda",
-            function_name="",
+            function_name="postagram-image",
             runtime="python3.10",
             memory_size=128,
             timeout=60,
-            role=f"",
+            role=f"arn:aws:iam::{account_id}:role/LabRole",
             filename= code.path,
-            handler="",
-            environment={"variables":{}}
+            handler="lambda_function.lambda_handler",
+            environment={
+                "variables": {
+                    "DYNAMO_TABLE": dynamo_table.name,
+                    "BUCKET": bucket.bucket
+                }
+            }
+
         )
 
-        # NE PAS TOUCHER !!!!
+                        # NE PAS TOUCHER !!!!
         permission = LambdaPermission(
             self, "lambda_permission",
             action="lambda:InvokeFunction",

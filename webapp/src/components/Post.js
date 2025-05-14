@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { getToken } from "../App"
 import axios from 'axios';
 
+
 function Post({ post, removePost, updatePost }) {
     const [showCard, setShowCard] = useState(true);
     const [attachment, setAttachment] = useState(null);
@@ -16,6 +17,7 @@ function Post({ post, removePost, updatePost }) {
         setAttachment(files[0]);
     }
     const getSignedUrlPut = async (postId) => {
+        
         console.log("Getting signed URL");
         console.log(attachment.name)
         const config = {
@@ -26,17 +28,22 @@ function Post({ post, removePost, updatePost }) {
                 postId: postId,
             },
         };
-
+       
         const response = await axios.get("/signedUrlPut", config);
         return new URL(response.data.uploadURL);
     }
     const submitFile = async () => {
+        
         if (!attachment) {
             alert("Please select a file to upload.");
         }
+        
+        
         const postId = post.id.split("#")[1];
-        const uploadUrl = await getSignedUrlPut(postId);
+        
 
+        const uploadUrl = await getSignedUrlPut(postId);
+        
         const config = {
             headers: { "Content-Type": attachment.type },
         };

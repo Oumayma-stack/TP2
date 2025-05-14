@@ -8,6 +8,8 @@ class MyStack(TerraformStack):
         super().__init__(scope, id)
 
         # define resources here
+        
+        #change "app" in cdktf.json to deploy main_serverless first then main_server 
 
 
 app = App()
